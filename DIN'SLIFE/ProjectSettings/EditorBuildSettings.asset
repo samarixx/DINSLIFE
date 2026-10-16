@@ -14,5 +14,8 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/MAPA.unity
     guid: 9e0c0483b6c49d741bf87473c0534de5
+  - enabled: 1
+    path: Assets/Scenes/MERCADO.unity
+    guid: cca8bc7959a5f434cac0e1f95369664c
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 2bcd2660ca9b64942af0de543d8d7100, type: 3}

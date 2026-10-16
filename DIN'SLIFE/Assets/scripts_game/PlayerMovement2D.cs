@@ -7,7 +7,7 @@ public class PlayerMovement2D : MonoBehaviour
     [SerializeField] private float speed = 5f; // Velocidade do personagem
 
     private Vector2 targetPosition; // Posição para onde o player deve ir
-    private bool isMoving = false;
+    public bool isMoving = false;
     private Camera mainCamera;
 
     void Start()
