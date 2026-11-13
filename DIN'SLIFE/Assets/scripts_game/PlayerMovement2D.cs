@@ -9,32 +9,42 @@ public class PlayerMovement2D : MonoBehaviour
     private Vector2 targetPosition; 
     public bool isMoving = false;
     private Camera mainCamera;
+    private Rigidbody2D rb; 
 
     void Start()
     {
         mainCamera = Camera.main;
         targetPosition = transform.position; 
+        
+        
+        rb = GetComponent<Rigidbody2D>();
+        
+        if (rb == null)
+        {
+            Debug.LogError("O Player precisa de um Rigidbody2D!");
+        }
     }
 
     void Update()
     {
-        
+       
         if (Mouse.current != null && Mouse.current.leftButton.wasPressedThisFrame)
         {
             SetNewDestination();
         }
+    }
 
-        
+    
+    void FixedUpdate()
+    {
         MovePlayer();
     }
 
     void SetNewDestination()
     {
-        
         Vector2 mouseScreenPosition = Mouse.current.position.ReadValue();
         Vector3 worldPoint = mainCamera.ScreenToWorldPoint(mouseScreenPosition);
 
-       
         targetPosition = new Vector2(worldPoint.x, worldPoint.y);
         isMoving = true;
     }
@@ -44,12 +54,12 @@ public class PlayerMovement2D : MonoBehaviour
         if (isMoving)
         {
             
-            transform.position = Vector2.MoveTowards(transform.position, targetPosition, speed * Time.deltaTime);
-
+            Vector2 newPos = Vector2.MoveTowards(rb.position, targetPosition, speed * Time.fixedDeltaTime);
+            rb.MovePosition(newPos);
             
-            if (Vector2.Distance(transform.position, targetPosition) < 0.05f)
+            
+            if (Vector2.Distance(rb.position, targetPosition) < 0.05f)
             {
-                transform.position = targetPosition;
                 isMoving = false;
             }
         }
