@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.InputSystem; 
+using UnityEngine.EventSystems;
 
 public class PlayerMovement2D : MonoBehaviour
 {
@@ -27,6 +28,10 @@ public class PlayerMovement2D : MonoBehaviour
 
     void Update()
     {
+        // não anda enquanto o computador/celular está aberto ou o mouse está sobre a UI
+        if (MercadoManager.PcAberto || CelularUI.Aberto) return;
+        if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject()) return;
+
        
         if (Mouse.current != null && Mouse.current.leftButton.wasPressedThisFrame)
         {

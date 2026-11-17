@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.InputSystem; // Linha obrigatória para usar o novo Input System
+using UnityEngine.EventSystems;
 
 public class ClickManager : MonoBehaviour
 {
@@ -12,6 +13,10 @@ public class ClickManager : MonoBehaviour
 
     void Update()
     {
+        // ignora cliques no mundo enquanto o computador/celular está aberto ou o mouse está sobre a UI
+        if (MercadoManager.PcAberto || CelularUI.Aberto) return;
+        if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject()) return;
+
        
         if (Mouse.current != null && Mouse.current.leftButton.wasPressedThisFrame)
         {
