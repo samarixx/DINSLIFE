@@ -9,7 +9,7 @@ public class ComputadorMercado : MonoBehaviour, IClickable
 {
     public void OnClick()
     {
-        if (MercadoManager.Instance != null)
-            MercadoManager.Instance.AbrirComputador();
+        if (MercadexManager.Instance != null)
+            MercadexManager.Instance.AbrirComputador();
     }
 }

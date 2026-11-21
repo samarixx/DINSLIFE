@@ -19,9 +19,9 @@ using UnityEngine.UI;
 /// Toda a interface é criada por código: basta colocar este script em um
 /// GameObject vazio da cena MERCADO. Nada mais é obrigatório no Inspector.
 /// </summary>
-public class MercadoManager : MonoBehaviour
+public class MercadexManager : MonoBehaviour
 {
-    public static MercadoManager Instance { get; private set; }
+    public static MercadexManager Instance { get; private set; }
 
     // Outros scripts consultam isso para ignorar cliques no mundo.
     public static bool PcAberto { get; private set; }
@@ -32,6 +32,7 @@ public class MercadoManager : MonoBehaviour
         public string nome;
         public float precoMinimo = 2f;   // em reais
         public float precoMaximo = 10f;  // em reais
+        public Sprite icone;             // imagem do produto (aparece quando o cliente pede)
         [HideInInspector] public int precoAtual; // em centavos (sorteado em runtime)
     }
 
@@ -89,6 +90,7 @@ public class MercadoManager : MonoBehaviour
     // UI
     private GameObject painelPc, balao;
     private Button botaoAbrir;
+    private RectTransform areaItensPedido;
     private TMP_Text txtHud, txtBalao, txtPrecos, txtPedido, txtEtapa, txtDisplay, txtFeedback;
 
     private static readonly Color corAcerto = new Color(0.5f, 1f, 0.5f);
@@ -107,6 +109,7 @@ public class MercadoManager : MonoBehaviour
         Instance = this;
 
         if (produtos.Count == 0) PreencherProdutosPadrao();
+        PrepararClienteVisual();
         if (nomesClientes.Count == 0) nomesClientes.Add("Cliente");
         if (maxItens < minItens) maxItens = minItens;
 
@@ -140,12 +143,99 @@ public class MercadoManager : MonoBehaviour
 
     private void PreencherProdutosPadrao()
     {
-        produtos.Add(new ProdutoMercado { nome = "Pão",       precoMinimo = 1f, precoMaximo = 3f });
-        produtos.Add(new ProdutoMercado { nome = "Queijo",    precoMinimo = 4f, precoMaximo = 9f });
-        produtos.Add(new ProdutoMercado { nome = "Macarrão",  precoMinimo = 3f, precoMaximo = 7f });
-        produtos.Add(new ProdutoMercado { nome = "Feijão",    precoMinimo = 5f, precoMaximo = 10f });
-        produtos.Add(new ProdutoMercado { nome = "Chocolate", precoMinimo = 3f, precoMaximo = 8f });
-        produtos.Add(new ProdutoMercado { nome = "Leite",     precoMinimo = 4f, precoMaximo = 7f });
+        produtos.Add(NovoProduto("Pão",       1f, 3f));
+        produtos.Add(NovoProduto("Queijo",    4f, 9f));
+        produtos.Add(NovoProduto("Macarrão",  3f, 7f));
+        produtos.Add(NovoProduto("Feijão",    5f, 10f));
+        produtos.Add(NovoProduto("Chocolate", 3f, 8f));
+    }
+
+    private static ProdutoMercado NovoProduto(string nome, float min, float max)
+    {
+        return new ProdutoMercado
+        {
+            nome = nome,
+            precoMinimo = min,
+            precoMaximo = max,
+            icone = BuscarIconeNoEditor(nome)
+        };
+    }
+
+    // Garante que o cliente apareça na cena: acha a "Pessoa2" se o campo estiver vazio
+    // e usa todas as imagens de clientes do projeto se a lista estiver vazia.
+    private void PrepararClienteVisual()
+    {
+        if (clienteVisual == null)
+        {
+            GameObject g = GameObject.Find("Pessoa2");
+            if (g != null) clienteVisual = g.GetComponent<SpriteRenderer>();
+        }
+
+        if (spritesClientes.Count == 0)
+            spritesClientes.AddRange(BuscarSpritesDeClientesNoEditor());
+    }
+
+    // Botão direito no componente > "Preencher produtos e clientes padrão".
+    // Preenche no Inspector os produtos (pão.png, queijo.png...) e TODAS as imagens de
+    // clientes (pessoa 1, pessoa 2, pessoa 3, idosa...) e salva na cena.
+    [ContextMenu("Preencher produtos e clientes padrão")]
+    private void PreencherProdutosNoInspector()
+    {
+        produtos.Clear();
+        PreencherProdutosPadrao();
+
+        spritesClientes.Clear();
+        spritesClientes.AddRange(BuscarSpritesDeClientesNoEditor());
+        if (clienteVisual == null)
+        {
+            GameObject g = GameObject.Find("Pessoa2");
+            if (g != null) clienteVisual = g.GetComponent<SpriteRenderer>();
+        }
+#if UNITY_EDITOR
+        UnityEditor.EditorUtility.SetDirty(this);
+#endif
+    }
+
+    // Acha as imagens de clientes (arquivos "pessoa ..." e "idosa"). Só funciona no Editor.
+    private static List<Sprite> BuscarSpritesDeClientesNoEditor()
+    {
+        List<Sprite> lista = new List<Sprite>();
+#if UNITY_EDITOR
+        foreach (string guid in UnityEditor.AssetDatabase.FindAssets("t:Sprite"))
+        {
+            string caminho = UnityEditor.AssetDatabase.GUIDToAssetPath(guid);
+            string arquivo = System.IO.Path.GetFileNameWithoutExtension(caminho).ToLowerInvariant();
+            if (!arquivo.StartsWith("pessoa") && !arquivo.StartsWith("idosa")) continue;
+
+            foreach (Object o in UnityEditor.AssetDatabase.LoadAllAssetsAtPath(caminho))
+            {
+                if (o is Sprite sp) { lista.Add(sp); break; }
+            }
+        }
+#endif
+        return lista;
+    }
+
+    // Procura a imagem do produto pelo nome do arquivo. Só funciona no Editor;
+    // por isso a lista deve ser preenchida no Inspector (menu acima) antes de gerar o jogo.
+    private static Sprite BuscarIconeNoEditor(string nome)
+    {
+#if UNITY_EDITOR
+        string alvo = nome.Normalize(System.Text.NormalizationForm.FormC).ToLowerInvariant();
+        foreach (string guid in UnityEditor.AssetDatabase.FindAssets("t:Sprite"))
+        {
+            string caminho = UnityEditor.AssetDatabase.GUIDToAssetPath(guid);
+            string arquivo = System.IO.Path.GetFileNameWithoutExtension(caminho)
+                .Normalize(System.Text.NormalizationForm.FormC).ToLowerInvariant();
+            if (arquivo != alvo) continue;
+
+            foreach (Object o in UnityEditor.AssetDatabase.LoadAllAssetsAtPath(caminho))
+            {
+                if (o is Sprite sp) return sp;
+            }
+        }
+#endif
+        return null;
     }
 
     private void SortearPrecos()
@@ -200,15 +290,78 @@ public class MercadoManager : MonoBehaviour
         if (clienteVisual != null)
         {
             if (spritesClientes.Count > 0)
-                clienteVisual.sprite = spritesClientes[Random.Range(0, spritesClientes.Count)];
-            clienteVisual.enabled = true;
+            {
+                // sorteia uma aparência diferente da do cliente anterior
+                int indice = Random.Range(0, spritesClientes.Count);
+                if (spritesClientes.Count > 1 && indice == ultimoSprite)
+                    indice = (indice + 1 + Random.Range(0, spritesClientes.Count - 1)) % spritesClientes.Count;
+                ultimoSprite = indice;
+                clienteVisual.sprite = spritesClientes[indice];
+            }
+            StartCoroutine(AparecerCliente());
         }
 
-        txtBalao.text = $"<b>{c.nome}:</b> Olá! Quero levar:\n{TextoPedido(c)}\nPode calcular no computador?";
+        txtBalao.text = $"<b>{c.nome}:</b> Olá! Quero fazer uma compra.\nPode me atender no computador?";
+        MontarItensDoPedido(c);
         balao.SetActive(true);
         botaoAbrir.gameObject.SetActive(true);
         AtualizarHud();
         AtualizarTextosPc();
+    }
+
+    private int ultimoSprite = -1;
+
+    // O cliente aparece na cena (com um fade rápido) antes de o jogador abrir o computador.
+    private IEnumerator AparecerCliente()
+    {
+        clienteVisual.enabled = true;
+        Color cor = clienteVisual.color;
+        for (float t = 0f; t < 1f; t += Time.deltaTime / 0.5f)
+        {
+            cor.a = t;
+            clienteVisual.color = cor;
+            yield return null;
+        }
+        cor.a = 1f;
+        clienteVisual.color = cor;
+    }
+
+    // Mostra no computador a imagem de cada produto pedido, com a quantidade (uma linha por produto).
+    private void MontarItensDoPedido(Cliente c)
+    {
+        LimparItensDoPedido();
+
+        int n = c.itens.Count;
+        float alturaLinha = 1f / Mathf.Max(4, n);
+        for (int i = 0; i < n; i++)
+        {
+            ItemPedido item = c.itens[i];
+            float topo = 1f - i * alturaLinha;
+
+            RectTransform linha = Retangulo("Item" + i, areaItensPedido,
+                new Vector2(0f, topo - alturaLinha), new Vector2(1f, topo));
+            linha.offsetMin = new Vector2(0, 4);
+            linha.offsetMax = new Vector2(0, -4);
+
+            if (item.produto.icone != null)
+            {
+                RectTransform rtImg = Retangulo("Icone", linha, new Vector2(0f, 0f), new Vector2(0.32f, 1f));
+                Image img = rtImg.gameObject.AddComponent<Image>();
+                img.sprite = item.produto.icone;
+                img.preserveAspect = true;
+                img.raycastTarget = false;
+            }
+
+            Texto("Rotulo", linha, new Vector2(0.35f, 0f), new Vector2(1f, 1f),
+                $"<b>{item.quantidade}x</b> {item.produto.nome}", 34,
+                TextAlignmentOptions.Left, Color.white);
+        }
+    }
+
+    private void LimparItensDoPedido()
+    {
+        foreach (Transform filho in areaItensPedido)
+            Destroy(filho.gameObject);
     }
 
     // ------------------------------------------------------------------ computador
@@ -383,12 +536,13 @@ public class MercadoManager : MonoBehaviour
         if (clienteAtual == null)
         {
             txtPedido.text = "Nenhum cliente no momento.";
+            LimparItensDoPedido();
             txtEtapa.text = "";
             txtDisplay.text = "R$ ";
             return;
         }
 
-        txtPedido.text = $"<b>{clienteAtual.nome}</b> quer:\n\n{TextoPedido(clienteAtual)}";
+        txtPedido.text = $"<b>{clienteAtual.nome}</b> quer:";
         txtEtapa.text = etapa == Etapa.Total
             ? "Qual é o <b>TOTAL</b> da compra?"
             : $"O cliente pagou com <b>{Reais(clienteAtual.pago)}</b>.\nQual é o <b>TROCO</b>?";
@@ -421,7 +575,7 @@ public class MercadoManager : MonoBehaviour
             "", 34, TextAlignmentOptions.Left, Color.white);
 
         // Balão do cliente
-        RectTransform rtBalao = Retangulo("Balao", raiz, new Vector2(0.28f, 0.76f), new Vector2(0.72f, 0.96f));
+        RectTransform rtBalao = Retangulo("Balao", raiz, new Vector2(0.28f, 0.8f), new Vector2(0.72f, 0.96f));
         Fundo(rtBalao, new Color(1f, 1f, 1f, 0.95f));
         balao = rtBalao.gameObject;
         txtBalao = Texto("TextoBalao", rtBalao, new Vector2(0.03f, 0.05f), new Vector2(0.97f, 0.95f),
@@ -448,8 +602,9 @@ public class MercadoManager : MonoBehaviour
 
         Texto("CabPedido", rtPc, new Vector2(0.35f, 0.8f), new Vector2(0.65f, 0.89f),
             "PEDIDO", 32, TextAlignmentOptions.Left, corAviso);
-        txtPedido = Texto("Pedido", rtPc, new Vector2(0.35f, 0.15f), new Vector2(0.65f, 0.8f),
-            "", 34, TextAlignmentOptions.TopLeft, Color.white);
+        txtPedido = Texto("Pedido", rtPc, new Vector2(0.35f, 0.7f), new Vector2(0.65f, 0.8f),
+            "", 34, TextAlignmentOptions.Left, Color.white);
+        areaItensPedido = Retangulo("ItensPedido", rtPc, new Vector2(0.35f, 0.15f), new Vector2(0.65f, 0.7f));
 
         txtEtapa = Texto("Etapa", rtPc, new Vector2(0.67f, 0.68f), new Vector2(0.97f, 0.89f),
             "", 30, TextAlignmentOptions.Left, Color.white);
