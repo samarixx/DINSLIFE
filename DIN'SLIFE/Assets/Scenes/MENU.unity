@@ -1537,7 +1537,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 0.392}
+  m_Color: {r: 1, g: 1, b: 1, a: 0.8901961}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -2727,8 +2727,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -52.64, y: -40}
-  m_SizeDelta: {x: 734.85, y: 225.93}
+  m_AnchoredPosition: {x: -52.64, y: -36}
+  m_SizeDelta: {x: 734.85, y: 301.71}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &975124237
 MonoBehaviour:
@@ -2750,8 +2750,9 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "<b>Equipe:</b>\n\nPrograma\xE7\xE3o: Luara, Wellington, Jo\xE3o Vitor,
-    Filipe, Arthur.\n\nArte: Elisa, Italo, Leandro, Ingrid.\n\nMusica: "
+  m_text: "<b>Equipe</b>\n\nLideran\xE7a: Samara\n\nPrograma\xE7\xE3o: Luara, Wellington,
+    Jo\xE3o Vitor, Filipe, Arthur.\n\nArte: Elisa, Italo, Leandro, Ingrid.\n\nAssist\xEAncia:
+    Juliana, Ysrael.\n\nMusica: "
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: e2b1af316874713409820493773a7acb, type: 2}
   m_sharedMaterial: {fileID: -1771519769197722447, guid: e2b1af316874713409820493773a7acb, type: 2}

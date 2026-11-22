@@ -73,7 +73,7 @@ public class MercadexManager : MonoBehaviour
     [Tooltip("A cada quantos clientes os preços são sorteados de novo.")]
     [SerializeField, Min(1)] private int clientesPorRodada = 5;
     [Tooltip("Dinheiro ganho (em reais) a cada cliente atendido corretamente.")]
-    [SerializeField] private float recompensa = 5f;
+    [SerializeField] private float recompensa = 25f;
 
     // Estado do jogo
     private Cliente clienteAtual;
@@ -83,7 +83,6 @@ public class MercadexManager : MonoBehaviour
     private int clientesAtendidos;
     private int acertos;
     private int erros;
-    private int dinheiro; // centavos
 
     private static readonly int[] notas = { 500, 1000, 2000, 5000, 10000, 20000 };
 
@@ -251,9 +250,17 @@ public class MercadexManager : MonoBehaviour
 
     private void ProximoCliente()
     {
+        int quantidadeClientes = nomesClientes.Count;
+        if (spritesClientes.Count > 0)
+            quantidadeClientes = Mathf.Min(quantidadeClientes, spritesClientes.Count);
+        int indice = Random.Range(0, quantidadeClientes);
+        if (quantidadeClientes > 1 && indice == ultimoSprite)
+            indice = (indice + Random.Range(1, quantidadeClientes)) % quantidadeClientes;
+        ultimoSprite = indice;
+
         Cliente c = new Cliente
         {
-            nome = nomesClientes[Random.Range(0, nomesClientes.Count)]
+            nome = nomesClientes[indice]
         };
 
         // embaralha os produtos e pega alguns
@@ -291,11 +298,6 @@ public class MercadexManager : MonoBehaviour
         {
             if (spritesClientes.Count > 0)
             {
-                // sorteia uma aparência diferente da do cliente anterior
-                int indice = Random.Range(0, spritesClientes.Count);
-                if (spritesClientes.Count > 1 && indice == ultimoSprite)
-                    indice = (indice + 1 + Random.Range(0, spritesClientes.Count - 1)) % spritesClientes.Count;
-                ultimoSprite = indice;
                 clienteVisual.sprite = spritesClientes[indice];
             }
             StartCoroutine(AparecerCliente());
@@ -453,8 +455,8 @@ public class MercadexManager : MonoBehaviour
             {
                 acertos++;
                 int ganho = Mathf.RoundToInt(recompensa * 100f);
-                dinheiro += ganho;
-                StartCoroutine(Encerrar($"Perfeito! Você ganhou {Reais(ganho)}.", corAcerto));
+                BancoDin.Depositar(ganho);
+                StartCoroutine(Encerrar($"Perfeito! {Reais(ganho)} depositados no banco.", corAcerto));
             }
         }
         else
@@ -515,7 +517,7 @@ public class MercadexManager : MonoBehaviour
 
     private void AtualizarHud()
     {
-        txtHud.text = $"Dinheiro: {Reais(dinheiro)}    Acertos: {acertos}    Erros: {erros}";
+        txtHud.text = $"Banco: {Reais(BancoDin.Saldo)}    Acertos: {acertos}    Erros: {erros}";
     }
 
     private void Feedback(string msg, Color cor)
