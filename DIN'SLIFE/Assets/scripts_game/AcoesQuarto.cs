@@ -46,27 +46,50 @@ public class AcoesQuarto : MonoBehaviour
             MostrarAviso("Din desligou o PC.");
             return;
         }
-
-        bool temPlacaMae = BancoDin.Comprada(BancoDin.Peca.PlacaMae);
-        bool temMemoria = BancoDin.Comprada(BancoDin.Peca.Memoria);
-
-        if (!temPlacaMae || !temMemoria)
+    
+        string[] pecasObrigatorias =
         {
-            string falta;
-            if (!temPlacaMae && !temMemoria)
-                falta = "a placa-mãe e a memória RAM";
-            else if (!temPlacaMae)
-                falta = "a placa-mãe";
-            else
-                falta = "a memória RAM";
-
-            MostrarAviso("Para ligar o PC, compre " + falta + " no Papaya.");
+            "mouse",
+            "teclado",
+            "estabilizador",
+            "cooler",
+            "gabinete",
+            "ssd",
+            "placa-basica",
+            "ram-fury-16",
+            "ryzen-5900x",
+            "rtx-5067"
+        };
+    
+        int pecasCompradas = 0;
+    
+        foreach (string id in pecasObrigatorias)
+        {
+            if (InventarioDin.Tem(id))
+                pecasCompradas++;
+        }
+    
+        bool temMonitor = InventarioDin.Tem("monitor-usado") ||
+                          InventarioDin.Tem("monitor-bom");
+    
+        if (temMonitor)
+            pecasCompradas++;
+    
+        int totalNecessario = pecasObrigatorias.Length + 1;
+    
+        if (pecasCompradas < totalNecessario)
+        {
+            string aviso = $"Din tem {pecasCompradas} de {totalNecessario} peças.";
+            if (!temMonitor)
+                aviso += " Falta um monitor. Pode ser o usado ou o novo.";
+    
+            MostrarAviso(aviso);
             return;
         }
-
+    
         pcLigado = true;
         AtualizarBotaoPC();
-        MostrarAviso("Din está jogando no PC!");
+        MostrarAviso("Din ligou o PC dos sonhos!");
     }
 
     private void AtualizarBotaoPC()

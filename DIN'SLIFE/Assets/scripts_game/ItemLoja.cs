@@ -60,7 +60,7 @@ public class ItemLoja
         new Def { palavra = "gabinete",      id = "gabinete",     nome = "Gabinete gamer ATX",              preco = 349.90f,  desconto = 20 },
         new Def { palavra = "monitor bom",   id = "monitor-bom",  nome = "Monitor 24\" Full HD 144Hz",      preco = 899.90f,  desconto = 15 },
         new Def { palavra = "ssd",           id = "ssd",          nome = "SSD NVMe WD Black SN850X 1TB",    preco = 899.90f,  desconto = 20 },
-        new Def { palavra = "placa de vid",  id = "placa-basica", nome = "Placa de vídeo básica",           preco = 1199.90f, desconto = 15, libera = LiberaPeca.PlacaMae },
+        new Def { palavra = "placa de vid",  id = "placa-basica", nome = "Placa-mãe ASUS TUF Gaming X570",           preco = 1199.90f, desconto = 15, libera = LiberaPeca.PlacaMae },
         new Def { palavra = "fury",          id = "ram-fury-16",  nome = "Memória RAM Kingston Fury 16GB",  preco = 1449.90f, desconto = 24, libera = LiberaPeca.Memoria },
         new Def { palavra = "ryzen",         id = "ryzen-5900x",  nome = "Processador Ryzen 9 5900X",       preco = 2699.00f, desconto = 15 },
         new Def { palavra = "rtx",           id = "rtx-5067",     nome = "Placa de vídeo RTX 5067",         preco = 4299.90f, desconto = 15 },

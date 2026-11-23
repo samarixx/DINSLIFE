@@ -1,27 +1,17 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-/// <summary>
-/// Trilha sonora do jogo: uma música diferente para cada cena.
-///
-/// - Coloque em um GameObject vazio na primeira cena (MENU). Ele continua tocando entre as cenas.
-/// - Na lista "Trilhas", cada item tem o nome da cena e a música dela.
-/// - Ao trocar de cena, a música atual some aos poucos (fade) e a nova entra.
-/// - Se a cena nova usa a MESMA música, ela não reinicia.
-/// - Ao voltar para uma cena (ex.: fechar o celular e voltar ao quarto), a música
-///   continua de onde parou.
-/// </summary>
 [RequireComponent(typeof(AudioSource))]
 public class TrilhaSonora : MonoBehaviour
 {
     public static TrilhaSonora Instance { get; private set; }
 
-    [System.Serializable]
+    [Serializable]
     public class TrilhaDaCena
     {
-        [Tooltip("Nome exato da cena, como aparece em Assets/Scenes (ex.: QUARTO).")]
         public string nomeDaCena;
         public AudioClip musica;
         [Range(0f, 1f)] public float volume = 0.6f;
@@ -32,38 +22,29 @@ public class TrilhaSonora : MonoBehaviour
 
     [Header("Ajustes")]
     [SerializeField, Range(0f, 1f)] private float volumeGeral = 1f;
-    [Tooltip("Segundos para uma música sumir e a outra entrar. 0 = troca seca.")]
     [SerializeField, Min(0f)] private float duracaoDoFade = 1f;
-    [Tooltip("Cena sem música na lista (ou com o campo Musica vazio) continua com a música que já estava tocando. Desligado = silêncio.")]
     [SerializeField] private bool cenaSemMusicaMantemAnterior = true;
-    [Tooltip("Ao voltar para uma música que já tocou, continua de onde parou.")]
     [SerializeField] private bool retomarDeOndeParou = true;
+
+    private const string ChaveVolume = "Din.VolumeMenu";
+    private const string ChaveMusica = "Din.MusicaAmbientes";
+
+    public static float VolumeMenu { get; private set; }
+    public static bool MusicaLigada { get; private set; }
+
+    private readonly Dictionary<AudioClip, float> posicoes =
+        new Dictionary<AudioClip, float>();
 
     private AudioSource fonte;
     private Coroutine troca;
     private AudioClip clipAtual;
-    private float volumeDaCena;
-    private readonly Dictionary<AudioClip, float> posicoes = new Dictionary<AudioClip, float>();
-
-    // Ao adicionar o componente, já cria uma linha para cada cena do jogo.
-    private void Reset()
-    {
-        trilhas = new List<TrilhaDaCena>
-        {
-            new TrilhaDaCena { nomeDaCena = "MENU" },
-            new TrilhaDaCena { nomeDaCena = "QUARTO" },
-            new TrilhaDaCena { nomeDaCena = "MAPA" },
-            new TrilhaDaCena { nomeDaCena = "MERCADO" },
-            new TrilhaDaCena { nomeDaCena = "TELEFONE" },
-        };
-    }
+    private bool tocandoMenu;
+    private float nivelAtual;
 
     private void Awake()
     {
         if (Instance != null && Instance != this)
         {
-            // já existe uma trilha tocando (vinda de outra cena): esta cópia some
-            enabled = false;
             Destroy(gameObject);
             return;
         }
@@ -72,28 +53,25 @@ public class TrilhaSonora : MonoBehaviour
         transform.SetParent(null);
         DontDestroyOnLoad(gameObject);
 
+        VolumeMenu = PlayerPrefs.GetFloat(ChaveVolume, 1f);
+        MusicaLigada = PlayerPrefs.GetInt(ChaveMusica, 1) == 1;
+
         fonte = GetComponent<AudioSource>();
-        fonte.loop = true;
         fonte.playOnAwake = false;
-        fonte.spatialBlend = 0f; // som 2D
+        fonte.loop = true;
+        fonte.spatialBlend = 0f;
         fonte.volume = 0f;
     }
 
     private void OnEnable()
     {
-        if (Instance != this) return;
-        SceneManager.sceneLoaded += AoCarregarCena;
+        if (Instance == this)
+            SceneManager.sceneLoaded += AoCarregarCena;
     }
 
     private void OnDisable()
     {
         SceneManager.sceneLoaded -= AoCarregarCena;
-    }
-
-    private void Start()
-    {
-        if (Instance != this) return;
-        TocarParaCena(SceneManager.GetActiveScene().name); // a cena em que o jogo começou
     }
 
     private void AoCarregarCena(Scene cena, LoadSceneMode modo)
@@ -102,87 +80,137 @@ public class TrilhaSonora : MonoBehaviour
             TocarParaCena(cena.name);
     }
 
-    // ------------------------------------------------------------------ troca de música
-
     private void TocarParaCena(string nomeDaCena)
     {
-        TrilhaDaCena trilha = trilhas.Find(t =>
-            t != null && string.Equals(t.nomeDaCena, nomeDaCena, System.StringComparison.OrdinalIgnoreCase));
+        bool menu = string.Equals(nomeDaCena, "MENU",
+            StringComparison.OrdinalIgnoreCase);
+
+        TrilhaDaCena trilha = trilhas.Find(item =>
+            item != null && string.Equals(item.nomeDaCena, nomeDaCena,
+                StringComparison.OrdinalIgnoreCase));
 
         bool temMusica = trilha != null && trilha.musica != null;
-        if (!temMusica && cenaSemMusicaMantemAnterior) return; // segue tocando a música atual
 
-        AudioClip novo = temMusica ? trilha.musica : null; // sem música e sem "manter": silêncio
+        // Com Música desligada, entrar num ambiente interrompe a trilha.
+        if (!menu && !MusicaLigada)
+        {
+            CancelarTroca();
+            PararEGuardarPosicao();
+            return;
+        }
+
+        if (!temMusica && cenaSemMusicaMantemAnterior)
+            return;
+
+        CancelarTroca();
+        AudioClip proximo = temMusica ? trilha.musica : null;
         float volume = temMusica ? trilha.volume : 0f;
-
-        if (troca != null) StopCoroutine(troca);
-        troca = StartCoroutine(Trocar(novo, volume));
+        troca = StartCoroutine(Trocar(proximo, volume, menu));
     }
 
-    private IEnumerator Trocar(AudioClip novo, float volume)
+    private void CancelarTroca()
     {
-        volumeDaCena = volume;
-        float alvo = volume * volumeGeral;
+        if (troca != null)
+            StopCoroutine(troca);
 
-        // mesma música da cena anterior: não reinicia, só ajusta o volume
-        if (novo != null && novo == clipAtual && fonte.isPlaying)
-        {
-            yield return Fade(fonte.volume, alvo);
-            troca = null;
-            yield break;
-        }
-
-        // a música atual sai
-        if (clipAtual != null && fonte.isPlaying)
-        {
-            yield return Fade(fonte.volume, 0f);
-            posicoes[clipAtual] = fonte.time;
-            fonte.Stop();
-        }
-
-        clipAtual = novo;
-        if (novo == null)
-        {
-            troca = null;
-            yield break;
-        }
-
-        // a nova música entra
-        fonte.clip = novo;
-        fonte.volume = 0f;
-        fonte.time = retomarDeOndeParou && posicoes.TryGetValue(novo, out float t) && t < novo.length ? t : 0f;
-        fonte.Play();
-        yield return Fade(0f, alvo);
         troca = null;
     }
 
-    private IEnumerator Fade(float de, float para)
+    private IEnumerator Trocar(AudioClip proximo, float volume, bool menu)
     {
-        if (duracaoDoFade <= 0f)
+        // QUARTO e TELEFONE usam "celular". Continua do mesmo ponto.
+        if (proximo != null && proximo == clipAtual && fonte.isPlaying)
         {
-            fonte.volume = para;
+            tocandoMenu = menu;
+            yield return Fade(volume);
             yield break;
         }
 
-        for (float t = 0f; t < 1f; t += Time.unscaledDeltaTime / duracaoDoFade)
+        if (fonte.isPlaying)
         {
-            fonte.volume = Mathf.Lerp(de, para, t);
-            yield return null;
+            yield return Fade(0f);
+            PararEGuardarPosicao();
         }
-        fonte.volume = para;
+
+        if (proximo == null)
+            yield break;
+
+        clipAtual = proximo;
+        tocandoMenu = menu;
+        fonte.clip = proximo;
+        fonte.time = 0f;
+
+        if (retomarDeOndeParou &&
+            posicoes.TryGetValue(proximo, out float tempo) &&
+            tempo < proximo.length)
+        {
+            fonte.time = tempo;
+        }
+
+        nivelAtual = 0f;
+        AplicarVolume();
+        fonte.Play();
+        yield return Fade(volume);
     }
 
-    // ------------------------------------------------------------------ para um menu de opções
+    private IEnumerator Fade(float destino)
+    {
+        float inicio = nivelAtual;
+        float tempo = 0f;
 
-    /// <summary>Volume de todas as trilhas (0 a 1). Pode ser ligado a um Slider.</summary>
+        while (tempo < duracaoDoFade)
+        {
+            nivelAtual = Mathf.Lerp(inicio, destino, tempo / duracaoDoFade);
+            AplicarVolume();
+            yield return null;
+            tempo += Time.unscaledDeltaTime;
+        }
+
+        nivelAtual = destino;
+        AplicarVolume();
+    }
+
+    private void PararEGuardarPosicao()
+    {
+        if (clipAtual != null && fonte.isPlaying)
+            posicoes[clipAtual] = fonte.time;
+
+        fonte.Stop();
+        clipAtual = null;
+        nivelAtual = 0f;
+        AplicarVolume();
+    }
+
+    private void AplicarVolume()
+    {
+        float ajusteDoMenu = tocandoMenu ? VolumeMenu : 1f;
+        fonte.volume = nivelAtual * volumeGeral * ajusteDoMenu;
+    }
+
+    public void AjustarVolumeMenu(float valor)
+    {
+        VolumeMenu = Mathf.Clamp01(valor);
+        PlayerPrefs.SetFloat(ChaveVolume, VolumeMenu);
+        AplicarVolume();
+    }
+
+    public void AjustarMusicaAmbientes(bool ligada)
+    {
+        MusicaLigada = ligada;
+        PlayerPrefs.SetInt(ChaveMusica, ligada ? 1 : 0);
+        PlayerPrefs.Save();
+
+        string cena = SceneManager.GetActiveScene().name;
+        if (!string.Equals(cena, "MENU", StringComparison.OrdinalIgnoreCase))
+            TocarParaCena(cena);
+    }
+
     public void DefinirVolumeGeral(float valor)
     {
         volumeGeral = Mathf.Clamp01(valor);
-        if (troca == null && fonte.isPlaying)
-            fonte.volume = volumeDaCena * volumeGeral;
+        AplicarVolume();
     }
 
-    /// <summary>Liga ou desliga o som da trilha.</summary>
     public void Mutar(bool mudo)
     {
         fonte.mute = mudo;

@@ -1004,7 +1004,7 @@ MonoBehaviour:
   m_MinValue: 0
   m_MaxValue: 1
   m_WholeNumbers: 0
-  m_Value: 0
+  m_Value: 0.48
   m_OnValueChanged:
     m_PersistentCalls:
       m_Calls: []
@@ -1375,6 +1375,7 @@ GameObject:
   - component: {fileID: 407305091}
   - component: {fileID: 407305090}
   - component: {fileID: 407305089}
+  - component: {fileID: 407305092}
   m_Layer: 5
   m_Name: "BUT\xC3O_SAIR"
   m_TagString: Untagged
@@ -1445,7 +1446,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 407305090}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 407305092}
+        m_TargetAssemblyTypeName: SairDoJogo, Assembly-CSharp
+        m_MethodName: Sair
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &407305090
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1484,6 +1497,18 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 407305087}
   m_CullTransparentMesh: 1
+--- !u!114 &407305092
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 407305087}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ba75df0b06fa2e44ca7df367d076ea53, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SairDoJogo
 --- !u!1 &426568896
 GameObject:
   m_ObjectHideFlags: 0
@@ -3001,8 +3026,8 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 1126930442}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 1}
+  m_AnchorMin: {x: 0.48, y: 0}
+  m_AnchorMax: {x: 0.48, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 20, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
@@ -3524,7 +3549,7 @@ RectTransform:
   m_Father: {fileID: 1926544255}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 1}
+  m_AnchorMax: {x: 0.48, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 10, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
@@ -4362,7 +4387,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Desligado
+  m_text: Ligada
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: c6a0bf3e9e8062540bf42f767bd18143, type: 2}
   m_sharedMaterial: {fileID: -2643329510481033609, guid: c6a0bf3e9e8062540bf42f767bd18143, type: 2}
@@ -4735,6 +4760,7 @@ GameObject:
   - component: {fileID: 1828617562}
   - component: {fileID: 1828617564}
   - component: {fileID: 1828617563}
+  - component: {fileID: 1828617566}
   m_Layer: 5
   m_Name: PanelAudio
   m_TagString: Untagged
@@ -4805,6 +4831,20 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1828617561}
   m_CullTransparentMesh: 1
+--- !u!114 &1828617566
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1828617561}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bf1cc1f9d7b608b439a765b913f0d232, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::OpcoesDeAudioDin
+  volume: {fileID: 188791298}
+  musica: {fileID: 2072024751}
 --- !u!1 &1850831765
 GameObject:
   m_ObjectHideFlags: 0
@@ -5601,7 +5641,7 @@ MonoBehaviour:
   onValueChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_IsOn: 0
+  m_IsOn: 1
 --- !u!1 &2079434687
 GameObject:
   m_ObjectHideFlags: 0
@@ -5611,6 +5651,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2079434690}
+  - component: {fileID: 2079434691}
   - component: {fileID: 2079434689}
   - component: {fileID: 2079434688}
   m_Layer: 0
@@ -5664,10 +5705,10 @@ AudioSource:
   OutputAudioMixerGroup: {fileID: 0}
   m_audioClip: {fileID: 0}
   m_Resource: {fileID: 0}
-  m_PlayOnAwake: 1
+  m_PlayOnAwake: 0
   m_Volume: 1
   m_Pitch: 1
-  Loop: 0
+  Loop: 1
   Mute: 0
   Spatialize: 0
   SpatializePostEffects: 0
@@ -5764,6 +5805,22 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2079434691
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2079434687}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6bdda6254154328408b16e8ca4e09d87, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ControleDeMusica
+  funcao: 1
+  barraVolume: {fileID: 0}
+  opcaoMusica: {fileID: 0}
+  fonteDaTrilha: {fileID: 2079434689}
 --- !u!1 &2097462741
 GameObject:
   m_ObjectHideFlags: 0
