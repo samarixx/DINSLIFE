@@ -2777,7 +2777,7 @@ MonoBehaviour:
       m_Calls: []
   m_text: "<b>Equipe</b>\n\nLideran\xE7a: Samara\n\nPrograma\xE7\xE3o: Luara, Wellington,
     Jo\xE3o Vitor, Filipe, Arthur.\n\nArte: Elisa, Italo, Leandro, Ingrid.\n\nAssist\xEAncia:
-    Juliana, Ysrael.\n\nMusica: "
+    Juliana, Ysrael, Matheus.\n\nMusica: Samara "
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: e2b1af316874713409820493773a7acb, type: 2}
   m_sharedMaterial: {fileID: -1771519769197722447, guid: e2b1af316874713409820493773a7acb, type: 2}
