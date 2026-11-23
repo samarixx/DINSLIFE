@@ -2096,6 +2096,80 @@ MonoBehaviour:
   iconePapaya: {fileID: 1843323193}
   iconeComida: {fileID: 1185426426}
   carrinho: {fileID: 661343612}
+  catalogo:
+  - id: mouse
+    nome: "Mouse \xF3ptico"
+    sprite: {fileID: 21300000, guid: 52000ba2d92631d43b57c390966f099a, type: 3}
+    precoOriginal: 59.9
+    descontoPercentual: 15
+    libera: 0
+  - id: teclado
+    nome: "Teclado mec\xE2nico"
+    sprite: {fileID: 21300000, guid: fdf0ea3e331b04e489a31cb364effcb2, type: 3}
+    precoOriginal: 189.9
+    descontoPercentual: 20
+    libera: 0
+  - id: estabilizador
+    nome: Estabilizador 1000VA
+    sprite: {fileID: 21300000, guid: 1e40a199109d00f4fb2e25004451baa6, type: 3}
+    precoOriginal: 219.9
+    descontoPercentual: 10
+    libera: 0
+  - id: cooler
+    nome: Cooler duplo para processador
+    sprite: {fileID: 938647757716257909, guid: a8f7218d02698344badb7f98a1200ef4, type: 3}
+    precoOriginal: 229.9
+    descontoPercentual: 15
+    libera: 0
+  - id: monitor-usado
+    nome: Monitor antigo (usado)
+    sprite: {fileID: 21300000, guid: f4ed29cacb987b744bccc5a9ad6ca925, type: 3}
+    precoOriginal: 199.9
+    descontoPercentual: 10
+    libera: 0
+  - id: gabinete
+    nome: Gabinete gamer ATX
+    sprite: {fileID: 21300000, guid: c23f5a1db1a035443b993265e2569166, type: 3}
+    precoOriginal: 349.9
+    descontoPercentual: 20
+    libera: 0
+  - id: monitor-bom
+    nome: Monitor 24" Full HD 144Hz
+    sprite: {fileID: 21300000, guid: 8b4fcdbba134a1c41b5567c7c26c8f81, type: 3}
+    precoOriginal: 899.9
+    descontoPercentual: 15
+    libera: 0
+  - id: ssd
+    nome: SSD NVMe WD Black SN850X 1TB
+    sprite: {fileID: 21300000, guid: 3b06d3ac7f8de0b4084f7616476893df, type: 3}
+    precoOriginal: 899.9
+    descontoPercentual: 20
+    libera: 0
+  - id: placa-basica
+    nome: "Placa de v\xEDdeo b\xE1sica"
+    sprite: {fileID: 8892091870235444158, guid: 3a831517366c92141b6d7626ebf68cf2, type: 3}
+    precoOriginal: 1199.9
+    descontoPercentual: 15
+    libera: 1
+  - id: ram-fury-16
+    nome: "Mem\xF3ria RAM Kingston Fury 16GB"
+    sprite: {fileID: 182051644146826158, guid: 5eb1820ebc8cc2c4b9cc7b1121488fe6, type: 3}
+    precoOriginal: 1449.9
+    descontoPercentual: 24
+    libera: 2
+  - id: ryzen-5900x
+    nome: Processador Ryzen 9 5900X
+    sprite: {fileID: -5771005843262374052, guid: bcd9fdd3fc040b448aa62170eac60de8, type: 3}
+    precoOriginal: 2699
+    descontoPercentual: 15
+    libera: 0
+  - id: rtx-5067
+    nome: "Placa de v\xEDdeo RTX 5067"
+    sprite: {fileID: -4332966845749129240, guid: a1775fd53bf80b64f86a96fe136754cf, type: 3}
+    precoOriginal: 4299.9
+    descontoPercentual: 15
+    libera: 0
+  fatorPreco: 1
 --- !u!1 &682082262
 GameObject:
   m_ObjectHideFlags: 0
@@ -8554,8 +8628,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -0.5, y: 2.4}
-  m_SizeDelta: {x: 30.6336, y: 30.6336}
+  m_AnchoredPosition: {x: 1.2709, y: 2.4}
+  m_SizeDelta: {x: 34.175, y: 30.6336}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &2066525924
 MonoBehaviour:

@@ -104,6 +104,23 @@ public static class BancoDin
         return "Peça comprada para o PC do Din!";
     }
 
+    // Compra genérica da loja Papaya: respeita o dinheiro reservado para contas e comida.
+    // "libera" marca a peça que o PC do quarto exige (usada por AcoesQuarto).
+    public static bool ComprarItem(string nome, int preco, Peca? libera, out string mensagem)
+    {
+        if (Livre < preco)
+        {
+            mensagem = "Faltam " + Reais(preco - Livre) + " para comprar.";
+            return false;
+        }
+        Dados.saldo -= preco;
+        if (libera == Peca.PlacaMae) Dados.placaMae = true;
+        else if (libera == Peca.Memoria) Dados.memoria = true;
+        Salvar();
+        mensagem = nome + " comprado!";
+        return true;
+    }
+
     public static void Dormir()
     {
         Dados.dia++;

@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
@@ -7,13 +8,30 @@ public class EconomiaTelefone : MonoBehaviour
 {
     [SerializeField] RectTransform inicio, banco, papaya;
     [SerializeField] RectTransform iconeBanco, iconePapaya, iconeComida, carrinho;
-    RectTransform telaBanco, telaLoja, telaComida;
-    TMP_Text infoBanco, infoLoja, infoComida, msgBanco, msgLoja, msgComida;
+    [Header("Loja Papaya (peças de computador)")]
+    [Tooltip("Produtos da loja. Se estiver vazio, usa o catálogo padrão com as imagens de media/pc.")]
+    [SerializeField] List<ItemLoja> catalogo = new List<ItemLoja>();
+    [Tooltip("Multiplica todos os preços da loja (1 = preço real; menor = mais fácil).")]
+    [SerializeField, Range(0.05f, 1f)] float fatorPreco = 1f;
+
+    RectTransform telaBanco, telaComida;
+    TMP_Text infoBanco, infoComida, msgBanco, msgComida;
     readonly Button[] contas = new Button[3];
-    Button placa, memoria;
+    LojaPapayaUI loja;
     readonly string[] nomes = { "Aluguel", "Água", "Energia" };
 
     void Reset() { LocalizarCampos(); }
+
+    // Botão direito no componente > "Preencher catálogo da loja (com imagens)".
+    // Preenche a lista no Inspector com as peças de Assets/media/pc e salva na cena.
+    [ContextMenu("Preencher catálogo da loja (com imagens)")]
+    void PreencherCatalogo()
+    {
+        catalogo = ItemLoja.CatalogoPadrao();
+#if UNITY_EDITOR
+        UnityEditor.EditorUtility.SetDirty(this);
+#endif
+    }
 
     void LocalizarCampos()
     {
@@ -54,13 +72,8 @@ public class EconomiaTelefone : MonoBehaviour
 
         // Mantém a oferta já desenhada no Papaya e abre a compra pelo carrinho.
         Botao(papaya, .90f, .98f, "Voltar ao telefone", () => papaya.gameObject.SetActive(false));
-        telaLoja = Painel(papaya, "Carrinho do Papaya");
-        infoLoja = Texto(telaLoja, .65f, .94f);
-        placa = Botao(telaLoja, .49f, .62f, "", () => Comprar(BancoDin.Peca.PlacaMae));
-        memoria = Botao(telaLoja, .32f, .45f, "", () => Comprar(BancoDin.Peca.Memoria));
-        msgLoja = Texto(telaLoja, .14f, .30f);
-        Botao(telaLoja, .02f, .12f, "Voltar à oferta", () => telaLoja.gameObject.SetActive(false));
-        telaLoja.gameObject.SetActive(false);
+        if (catalogo == null || catalogo.Count == 0) catalogo = ItemLoja.CatalogoPadrao();
+        loja = new LojaPapayaUI(papaya, catalogo, fatorPreco, Atualizar);
 
         telaComida = Painel(inicio, "Refeição do Din");
         infoComida = Texto(telaComida, .59f, .90f);
@@ -74,15 +87,9 @@ public class EconomiaTelefone : MonoBehaviour
         telaComida.gameObject.SetActive(false);
 
         Ligar(iconeBanco, () => { banco.gameObject.SetActive(true); msgBanco.text = ""; Atualizar(); });
-        Ligar(iconePapaya, () => { papaya.gameObject.SetActive(true); telaLoja.gameObject.SetActive(false); });
-        Ligar(carrinho, () => { telaLoja.gameObject.SetActive(true); msgLoja.text = ""; Atualizar(); });
+        Ligar(iconePapaya, () => { papaya.gameObject.SetActive(true); loja.Fechar(); });
+        Ligar(carrinho, () => { loja.Abrir(); Atualizar(); });
         Ligar(iconeComida, () => { telaComida.gameObject.SetActive(true); msgComida.text = ""; Atualizar(); });
-        Atualizar();
-    }
-
-    void Comprar(BancoDin.Peca p)
-    {
-        msgLoja.text = BancoDin.Comprar(p);
         Atualizar();
     }
 
@@ -95,17 +102,8 @@ public class EconomiaTelefone : MonoBehaviour
             Rotulo(contas[i], nomes[i] + (valor == 0 ? " • paga" : " • pagar " + BancoDin.Reais(valor)));
             contas[i].interactable = valor > 0;
         }
-        infoLoja.text = "Papaya\nLivre para peças: " + BancoDin.Reais(BancoDin.Livre);
-        MostrarPeca(placa, "Placa-mãe", BancoDin.Peca.PlacaMae);
-        MostrarPeca(memoria, "Memória RAM", BancoDin.Peca.Memoria);
+        if (loja != null) loja.Atualizar();
         infoComida.text = "YouFood\nReserva do mês: " + BancoDin.Reais(BancoDin.Reserva);
-    }
-
-    static void MostrarPeca(Button b, string nome, BancoDin.Peca p)
-    {
-        bool comprada = BancoDin.Comprada(p);
-        Rotulo(b, nome + " • " + (comprada ? "Comprada" : BancoDin.Reais(BancoDin.Preco(p))));
-        b.interactable = !comprada;
     }
 
     static void Ligar(RectTransform alvo, UnityAction acao)
